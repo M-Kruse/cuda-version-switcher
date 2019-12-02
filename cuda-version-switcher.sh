@@ -71,19 +71,30 @@ if [[ $INSTALL_CUDNN == "y" ]]
 	then
 		case $CUDA_VERSION in
 			10.0) CUDNN_URL="https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1804/x86_64/libcudnn7_7.6.5.32-1+cuda10.0_amd64.deb"
+			CUDNN_DEV_URL="https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1804/x86_64/libcudnn7-dev_7.6.5.32-1+cuda10.0_amd64.deb"
 			;;
 			10.1) CUDNN_URL="https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1804/x86_64/libcudnn7_7.6.5.32-1+cuda10.1_amd64.deb"
+			CUDNN_DEV_URL="https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1804/x86_64/libcudnn7-dev_7.6.5.32-1+cuda10.1_amd64.deb"
 			;;
 			10.2) CUDNN_URL="https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1804/x86_64/libcudnn7_7.6.5.32-1+cuda10.2_amd64.deb"
+			CUDNN_DEV_URL="https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1804/x86_64/libcudnn7-dev_7.6.5.32-1+cuda10.2_amd64.deb"
 			;;
 			*) echo "[ERROR] Something went wrong with the CUDNN version selection. Please use 10.0, 10.1 or 10.2."
 			;;
 		esac
 	CUDNN_PKG=$( echo $CUDNN_URL | awk -F'/' {'print $NF'} )
+	CUDNN_DEV_PKG=$( echo $CUDNN_DEV_URL | awk -F'/' {'print $NF'} )
 	if [[ ! -f $CUDNN_PKG ]]
 		then
 			echo "[INFO] Downloading ${CUDNN_PKG}"
 			wget $CUDNN_URL > /dev/null 2>&1
+			if [[ $? > 0 ]]
+				then
+					echo "[ERROR] Failed to download ${CUDNN_DEV_URL}. Exiting..."
+					exit 1
+			fi
+			echo "[INFO] Downloading ${CUDNN_DEV_PKG}"
+			wget $CUDNN_DEV_URL > /dev/null 2>&1
 			if [[ $? > 0 ]]
 				then
 					echo "[ERROR] Failed to download ${CUDNN_URL}. Exiting..."
@@ -92,9 +103,17 @@ if [[ $INSTALL_CUDNN == "y" ]]
 		else
 			echo "[INFO] Installing ${CUDNN_PKG}..."
 			sudo dpkg -i $CUDNN_PKG
+			
 			if [[ $? > 0 ]]
 				then
-					echo "[ERROR] Failed to install CUDNN repo package with dpkg. Exiting..."
+					echo "[ERROR] Failed to install ${CUDNN_URL}. Exiting..."
+					exit 1
+			fi
+			echo "[INFO] Installing ${CUDNN_DEV_PKG}..."
+			sudo dpkg -i $CUDNN_DEV_PKG
+			if [[ $? > 0 ]]
+				then
+					echo "[ERROR] Failed to install ${CUDNN_DEV_URL}. Exiting..."
 					exit 1
 			fi
 	fi
