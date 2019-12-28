@@ -67,7 +67,7 @@ echo "[INFO] Current CUDA symlink: $CUDA_SYMLINK -> $(readlink $CUDA_SYMLINK)"
 
 while [[ "$INSTALL_CUDNN" != "y" ]] || [[ "$INSTALL_CUDNN" != "y" ]]
 	do
-		read -s -p "[INPUT] Do you want to install the corresponding CUDNN version for your version of CUDA? (y/n)"  INSTALL_CUDNN
+		read -s -p "[INPUT] Do you want to install CUDNN for your version of CUDA? (y/n)"  INSTALL_CUDNN
 	done
 
 if [[ $INSTALL_CUDNN == "y" ]]
@@ -121,6 +121,9 @@ if [[ $INSTALL_CUDNN == "y" ]]
 						echo "[ERROR] Failed to download ${CUDNN_DEV_URL}. Exiting..."
 						exit 1
 				fi
+		fi
+		if [[ ! -f $CUDNN_DEV_PKG ]]
+			then
 				echo "[INFO] Downloading ${CUDNN_DEV_PKG}"
 				wget $CUDNN_DEV_URL > /dev/null 2>&1
 				if [[ $? > 0 ]]
@@ -128,23 +131,24 @@ if [[ $INSTALL_CUDNN == "y" ]]
 						echo "[ERROR] Failed to download ${CUDNN_URL}. Exiting..."
 						exit 1
 				fi
-			else
-				echo "[INFO] Installing ${CUDNN_PKG}..."
-				sudo dpkg -i $CUDNN_PKG
-				
-				if [[ $? > 0 ]]
-					then
-						echo "[ERROR] Failed to install ${CUDNN_URL}. Exiting..."
-						exit 1
-				fi
-				echo "[INFO] Installing ${CUDNN_DEV_PKG}..."
-				sudo dpkg -i $CUDNN_DEV_PKG
-				if [[ $? > 0 ]]
-					then
-						echo "[ERROR] Failed to install ${CUDNN_DEV_URL}. Exiting..."
-						exit 1
-				fi
 		fi
+		echo "[INFO] Installing ${CUDNN_PKG}..."
+		sudo dpkg -i $CUDNN_PKG
+		
+		if [[ $? > 0 ]]
+			then
+				echo "[ERROR] Failed to install ${CUDNN_URL}. Exiting..."
+				exit 1
+		fi
+		echo "[INFO] Installing ${CUDNN_DEV_PKG}..."
+		sudo dpkg -i $CUDNN_DEV_PKG
+		if [[ $? > 0 ]]
+			then
+				echo "[ERROR] Failed to install ${CUDNN_DEV_URL}. Exiting..."
+				exit 1
+		fi
+	else
+		echo "[INFO] Skipping libCUDNN installation..."
 fi
 
 
